@@ -1,5 +1,5 @@
 # CAPER
-Center for Advanced Power Engineering
+Center for Advanced Power Engineering Research
 
 Clemson University Professor/Advisor:
 	Dr. Randy Collins
