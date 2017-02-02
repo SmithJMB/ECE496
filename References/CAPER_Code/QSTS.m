@@ -150,7 +150,7 @@ axis([0 24 -500 500]);
 set(gca,'XTick',[0:1:24])
 grid on
 set(gca,'FontWeight','bold');
-legend('P(ph_A)','P(ph_B)','P(ph_C)','Q(ph_A)','Q(ph_B)','Q(ph_C)','location','northeastoutside');
+legend('P(ph_A)____','P(ph_B)____','P(ph_C)____','Q(ph_A)____','Q(ph_B)____','Q(ph_C)____','location','northeastoutside');
 
 
 %%

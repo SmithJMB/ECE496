@@ -1,0 +1,74 @@
+Characteristics for:	1 - ROXBORO
+
+
+Warning: There are 1 isolated elements, 1 of which are enabled and without voltage.
+View the output structure for a list of offenders.
+ 
+> In circuitCheck (line 635)
+  In STATIC (line 156) 
+
+Warning: There are 4 loops in the circuit. The loops can also be viewed using DSSText.command='show loops';
+View the output structure for a list of offenders.
+ 
+> In circuitCheck (line 635)
+  In STATIC (line 156) 
+
+Warning: There are 1 buses above 600V that are missing coordinates.
+View the output structure for a list of offenders.
+ 
+> In circuitCheck (line 635)
+  In STATIC (line 156) 
+
+Warning: The bus coordinates are not in latitude/longitude values. The mapping background will not be able
+to display for the circuit plot. Use initCoordConversion(); to convert coordinates to Lat/Lon.
+View the output structure for a list of offenders.
+ 
+> In circuitCheck (line 635)
+  In STATIC (line 156) 
+
+Warning: 8 of the transformers are overloaded, bus1 power is more than 100 percent of transformer kVA
+rating. Check that the loads on that transformer are entered correctly.
+View the output structure for a list of offenders.
+ 
+> In circuitCheck (line 635)
+  In STATIC (line 156) 
+
+Warning: 32 of the enabled bus voltages are outside of the range 1 +/- 0.05 pu. Visualize using
+plotVoltageProfile(DSSCircObj)
+View the output structure for a list of offenders.
+ 
+> In circuitCheck (line 635)
+  In STATIC (line 156) 
+
+Warning: 460 of the line ratings are 30 percent the size of the immediately upstream line. Visualize using
+plotCircuitLines(DSSCircObj,'Thickness','lineRating')
+View the output structure for a list of offenders.
+ 
+> In circuitCheck (line 635)
+  In STATIC (line 156) 
+
+
+Warning: There are at least 3 warnings associated with this circuit. It is recommended you start at the top
+of the warning structure list when repairing. 
+> In circuitCheck (line 651)
+  In STATIC (line 156) 
+(Solved at 100%)
+
+Peak Load (MW): 8.884
+Total Length: 87.416 mi
+Peak Load Headroom: 0.020 P.U.
+Overall End Distance: 18.987 km
+3-ph End Distance: 11.464 km
+
+Connected kVA:
+ A:11547.333
+ B:12424.833
+ C:12044.833
+Connected kVA(PU):
+ A:32.061
+ B:34.497
+ C:33.442
+R=97.421 % and C=2.579 %
+Distribution of Conductor Ampere Ratings
+0		200		400		600		800		1000
+	6.81	1.35	 0.00	4.53	0.00	0.00
