@@ -3,6 +3,7 @@ SXSTtoDSS reads in a CYME file (.sxst) and generates the following files
 Master.dss - OpenDSS redirect information for defining circuit
 Shapes.dss - OpenDSS Daily and Yearly Loadshape definitions
 BusesCoords.dss - Bus Coordinates for plotting circuit
+*MUST BE A DEC CIRCUIT. NOT COMPATIBLE WITH DEP
 
 \Libraries
 % WireData.dss
@@ -14,7 +15,7 @@ BusesCoords.dss - Bus Coordinates for plotting circuit
 % *LinesNO.dss - OpenDSS line definitions for Normally Open points for loops
 % Loads.dss - OpenDSS load definitions
 % Capacitors.dss - OpenDSS capacitor definitions
-% Regulators.dss - OpenDSS regulator definitions
+% *Regulators.dss - OpenDSS regulator definitions
 
 \Controls
 % *FuseContrl.dss - OpenDSS fuse control settings
@@ -29,16 +30,17 @@ BusesCoords.dss - Bus Coordinates for plotting circuit
 clear
 clc
 
-fid(1) = fopen('pathdef.m');
-rootlocation = textscan(fid(1),'%c')';
-rootlocation = regexp(rootlocation{1}','C:[^.]*?CAPER\\','match','once');
-fclose(fid(1));
-rootlocation = [rootlocation,'07_CYME\'];
+% FOR FINDING ROOT DIRECTORY OF MY CYME FILES
+% fid(1) = fopen('pathdef.m');
+% rootlocation = textscan(fid(1),'%c')';
+% rootlocation = regexp(rootlocation{1}','C:[^.]*?CAPER\\','match','once');
+% fclose(fid(1));
+% rootlocation = [rootlocation,'07_CYME\'];
 
-filelocation = rootlocation; filename = 0;
+% filelocation = rootlocation; filename = 0;
 % ****To skip UIGETFILE uncomment desired filename****
 % ******(Must be in rootlocation CAPER\07_CYME)*******
-filename = 'Flay_ret_16271201.sxst';
+%filename = 'Flay 12-01 - 2-3-15 loads (original).sxst';
 %filename = 'Commonwealth 12-05-  9-14 loads (original).sxst';
 %filename = 'Kud1207 (original).sxst';
 %filename = 'Bellhaven 12-04 - 8-14 loads.xst (original).sxst'
@@ -46,10 +48,14 @@ filename = 'Flay_ret_16271201.sxst';
 %filename = 'Bellhaven_ret_01291204.sxst';
 %filename = 'Mocksville_Main_2401.sxst';
 
-while ~filename
-    [filename,filelocation] = uigetfile({'*.*','All Files'},'Select SXST file to Convert',...
-        rootlocation);
-end
+% while ~filename
+%     [filename,filelocation] = uigetfile({'*.*','All Files'},'Select SXST file to Convert',...
+%         rootlocation);
+% end
+
+% ENTER IN DIRECTORY AND FILENAME OF CYME FILE
+% filelocation = ;
+% filname = ;
 
 % Generate Save Location
 savelocation = [filelocation,filename,'_DSS\'];
@@ -100,7 +106,8 @@ EquipmentDB.Info = regexp(FILE,'<EquipmentDBs>(.*?)</EquipmentDBs>','match');
 
 
 % <SubstationDB>
-EquipmentDB.Substation = struct('Info',regexp(EquipmentDB.Info{1},'<SubstationDB>(.*?)<SubstationDetails>','match'));
+% <SubstationDB>
+EquipmentDB.Substation = struct('Info',regexp(EquipmentDB.Info{1},'<SubstationDB>(.*?)</SubstationDB>','match'));
 for i =1:length(EquipmentDB.Substation)
     EquipmentDB.Substation(i).ID = regexp(EquipmentDB.Substation(i).Info,'(?<=<EquipmentID>)(.*?)(?=</EquipmentID>)','match'); EquipmentDB.Substation(i).ID = EquipmentDB.Substation(i).ID{1};
     
@@ -111,32 +118,17 @@ for i =1:length(EquipmentDB.Substation)
     EquipmentDB.Substation(i).SetVpu = EquipmentDB.Substation(i).SetKVLL/EquipmentDB.Substation(i).BaseKVLL;
     EquipmentDB.Substation(i).SetAngle = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<SourcePhaseAngle>)(.*?)(?=</SourcePhaseAngle>)','match'));
     EquipmentDB.Substation(i).ImpedanceUnit = regexp(EquipmentDB.Substation(i).Info,'(?<=<ImpedanceUnit>)(.*?)(?=</ImpedanceUnit>)','match');
-    EquipmentDB.Substation(i).R1 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<PositiveSequenceResistance>)(.*?)(?=</PositiveSequenceResistance>)','match'));
-    EquipmentDB.Substation(i).X1 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<PositiveSequenceReactance>)(.*?)(?=</PositiveSequenceReactance>)','match'));
-    EquipmentDB.Substation(i).R2 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<NegativeSequenceResistance>)(.*?)(?=</NegativeSequenceResistance>)','match'));
-    EquipmentDB.Substation(i).X2 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<NegativeSequenceReactance>)(.*?)(?=</NegativeSequenceReactance>)','match'));
-    EquipmentDB.Substation(i).R0 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<ZeroSequenceResistance>)(.*?)(?=</ZeroSequenceResistance>)','match'));
-    EquipmentDB.Substation(i).X0 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<ZeroSequenceReactance>)(.*?)(?=</ZeroSequenceReactance>)','match'));
+    EquipmentDB.Substation(i).R1 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<PositiveSequenceResistance>)(.*?)(?=</PositiveSequenceResistance>)','match','once'));
+    EquipmentDB.Substation(i).X1 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<PositiveSequenceReactance>)(.*?)(?=</PositiveSequenceReactance>)','match','once'));
+    EquipmentDB.Substation(i).R2 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<NegativeSequenceResistance>)(.*?)(?=</NegativeSequenceResistance>)','match','once'));
+    EquipmentDB.Substation(i).X2 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<NegativeSequenceReactance>)(.*?)(?=</NegativeSequenceReactance>)','match','once'));
+    EquipmentDB.Substation(i).R0 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<ZeroSequenceResistance>)(.*?)(?=</ZeroSequenceResistance>)','match','once'));
+    EquipmentDB.Substation(i).X0 = str2double(regexp(EquipmentDB.Substation(i).Info,'(?<=<ZeroSequenceReactance>)(.*?)(?=</ZeroSequenceReactance>)','match','once'));
 end
 
-% <RegulatorDB>
-EquipmentDB.Regulator = struct('Info',regexp(EquipmentDB.Info{1},'<RegulatorDB>(.*?)</RegulatorDB>','match'));
-for i = 1:length(EquipmentDB.Regulator)
-    EquipmentDB.Regulator(i).ID = regexp(EquipmentDB.Regulator(i).Info,'(?<=<EquipmentID>)(.*?)(?=</EquipmentID>)','match'); EquipmentDB.Regulator(i).ID = EquipmentDB.Regulator(i).ID{1};
-    EquipmentDB.Regulator(i).Type = regexp(EquipmentDB.Regulator(i).Info,'(?<=<Type>)(.*?)(?=</Type>)','match'); EquipmentDB.Regulator(i).Type = EquipmentDB.Regulator(i).Type{1};
-    EquipmentDB.Regulator(i).Band = str2double(regexp(EquipmentDB.Regulator(i).Info,'(?<=<Bandwidth>)(.*?)(?=</Bandwidth>)','match')); 
-    EquipmentDB.Regulator(i).PTRatio = str2double(regexp(EquipmentDB.Regulator(i).Info,'(?<=<PTRatio>)(.*?)(?=</PTRatio>)','match'));
-    EquipmentDB.Regulator(i).CTPrim = str2double(regexp(EquipmentDB.Regulator(i).Info,'(?<=<CTPrimaryRating>)(.*?)(?=</CTPrimaryRating>)','match'));
-    
-    EquipmentDB.Regulator(i).MaxTap = 1+str2double(regexp(EquipmentDB.Regulator(i).Info,'(?<=<MaximumBoost>)(.*?)(?=</MaximumBoost>)','match'))/100;
-    EquipmentDB.Regulator(i).MinTap = 1-str2double(regexp(EquipmentDB.Regulator(i).Info,'(?<=<MaximumBuck>)(.*?)(?=</MaximumBuck>)','match'))/100;
-    EquipmentDB.Regulator(i).NumTaps = str2double(regexp(EquipmentDB.Regulator(i).Info,'(?<=<NumberOfTaps>)(.*?)(?=</NumberOfTaps>)','match'));
-    EquipmentDB.Regulator(i).kVA = str2double(regexp(EquipmentDB.Regulator(i).Info,'(?<=<RatedKVA>)(.*?)(?=</RatedKVA>)','match'));
-    
-end
 % <SwitchDB>
 EquipmentDB.Switch = struct('Info',regexp(EquipmentDB.Info{1},'<SwitchDB>(.*?)</SwitchDB>','match'));
-for i = 1:length(EquipmentDB.Switch)
+for i =1:length(EquipmentDB.Switch)
     EquipmentDB.Switch(i).ID = regexp(EquipmentDB.Switch(i).Info,'(?<=<EquipmentID>)(.*?)(?=</EquipmentID>)','match'); EquipmentDB.Switch(i).ID = EquipmentDB.Switch(i).ID{1};
     
     % Read Data
@@ -262,15 +254,18 @@ fclose(fid(9));
 
 %% Extract Source Information
 sourceinfo = regexp(FILE,'<Source>(.*?)</Source>','match');
-if sc > 1
-    %warning('DSS does not support multiple sources')
-    sourceinfo=sourceinfo{1};
+%Source = struct('Info',regexp(FILE,'<Source>(.*?)</Source>','match'));
+for sc = 1:length(sourceinfo)
+    SourceID = regexp(sourceinfo{sc},'(?<=<SourceNodeID>)(.*?)(?=</SourceNodeID>)','match');
+    index = ismember({EquipmentDB.Substation.ID},SourceID{1});
+    Source(sc) = EquipmentDB.Substation(index);
+    Source(sc).Info = sourceinfo{sc};
 end
 
-Source.ID = regexp(sourceinfo,'(?<=<SourceNodeID>)(.*?)(?=</SourceNodeID>)','match');
-[~,~,ic] = unique([{EquipmentDB.Substation.ID},Source.ID{1}],'stable');
-Source = EquipmentDB.Substation(ic(end));
-Source.Info = sourceinfo{1};
+% Select Source for Master file
+UIControl_FontSize_bak = get(0, 'DefaultUIControlFontSize');
+set(0, 'DefaultUIControlFontSize', 18);
+source = menu('Select Source for Circuit def and Energy Meter',Source.ID);
 
 %% Extract Node Information
 %  Output - Buses.dss (text file containing BusID, X, and Y Coords)
@@ -302,7 +297,6 @@ Lines = struct('Info',regexp(FILE,'<Section>(.*?)</Section>','match'));
 fid(4) = fopen([savelocation,'Elements\Lines.dss'],'wt');
 fid(5) = fopen([savelocation,'Elements\Loads.dss'],'wt');
 fid(6) = fopen([savelocation,'Elements\Capacitors.dss'],'wt');
-fid(11)= fopen([savelocation,'Elements\Regulators.dss'],'wt');
 for l = 1:s
     Lines(l).ID = regexp(Lines(l).Info,'(?<=<SectionID>)(.*?)(?=</SectionID>)','match'); Lines(l).ID = Lines(l).ID{1};
     Lines(l).Phase = regexp(Lines(l).Info,'(?<=<Phase>)(.*?)(?=</Phase>)','match','once');
@@ -437,7 +431,7 @@ for l = 1:s
         Loads(ld).Phase = Phase{1};
         Loads(ld).NumPhase = length(Phase);
         Loads(ld).Bus1 = strrep(Loads(ld).ID,'_','.');
-        Loads(ld).kV = Source.BaseKVLL/sqrt(3); % kV
+        Loads(ld).kV = Source(source).BaseKVLL/sqrt(3); % kV
         Loads(ld).XFKVA = str2double(regexp(spotloadinfo{i},'(?<=<ConnectedKVA>)(.*?)(?=</ConnectedKVA>)','match'));
         
         LoadType = regexp(spotloadinfo{i},'(?<=<LoadValue Type="LoadValue)(.*?)(?=">)','match');
@@ -467,17 +461,17 @@ for l = 1:s
         
         % Print Load
         % kW=#.###### yearly=YearlyP daily=DailyP kVAR=#.######
-        fprintf(fid(5),['New Load.%s Bus1=%-10s Phases=%d kV=%.4f ',...
-        'kW=%.6f yearly=Yearly%c daily=Daily%c kVAR=%.6f\n'],...
-        Loads(ld).ID,Loads(ld).Bus1,Loads(ld).NumPhase,Loads(ld).kV,...
-        Loads(ld).kW,repmat(Loads(ld).Phase,1,2),Loads(ld).kVAR);
+%         fprintf(fid(5),['New Load.%s Bus1=%-10s Phases=%d kV=%.4f ',...
+%         'kW=%.6f yearly=Yearly%c daily=Daily%c kVAR=%.6f\n'],...
+%         Loads(ld).ID,Loads(ld).Bus1,Loads(ld).NumPhase,Loads(ld).kV,...
+%         Loads(ld).kW,repmat(Loads(ld).Phase,1,2),Loads(ld).kVAR);
         %20,repmat(Loads(ld).Phase,1,2),2);
 
         % XFKVA=#.#(min10KVA) PF=0.95 yearly=YearlyP daily=DailyP
-%         fprintf(fid(5),['New Load.%s Bus1=%-10s Phases=%d kV=%.4f ',...
-%         'XFKVA=%.1f PF=%.2f yearly=Yearly%c daily=Daily%c\n'],...
-%         Loads(ld).ID,Loads(ld).Bus1,Loads(ld).NumPhase,Loads(ld).kV,...
-%         max(Loads(ld).XFKVA,10),0.95,repmat(Loads(ld).Phase,1,2));
+        fprintf(fid(5),['New Load.%s Bus1=%-10s Phases=%d kV=%.4f ',...
+        'XFKVA=%.1f PF=%.2f yearly=Yearly%c daily=Daily%c\n'],...
+        Loads(ld).ID,Loads(ld).Bus1,Loads(ld).NumPhase,Loads(ld).kV,...
+        max(Loads(ld).XFKVA,10),0.95,repmat(Loads(ld).Phase,1,2));
         
         ld = ld+1;
     end
@@ -520,15 +514,6 @@ for l = 1:s
     end
     
     % Regulators (counter = rg)
-    regulatorinfo = regexp(Lines(l).Info,'<Regulator>(.*?)</Regulator>','match');
-    if ~isempty(regulatorinfo)
-        DB = regexp(regulatorinfo{1},'(?<=<DeviceID>)(.*?)(?=</DeviceID>)','match');
-        index = ismember({EquipmentDB.Regulator.ID},DB);
-        Regulator(rg) = EquipmentDB.Regulator(index);
-        
-        
-        rg = rg+1;
-    end
     
     % Reclosers (counter = rc)
     
@@ -536,41 +521,65 @@ end
 fclose(fid(4));
 fclose(fid(5));
 fclose(fid(6));
-fclose(fid(11));
 Lines = rmfield(Lines,'Info');
 
 %% Generate Master File
+for sc = 1:length(Source)
+    index = mod(find(ismember([{Lines.Bus1},{Lines.Bus2}],[Source(sc).ID,'.1.2.3'])),l);
+    Source(sc).MeterLine = Lines(index).ID;
+    
+    Source(sc).PeakAmps = str2double(regexp(Source(sc).Info,'(?<=<AMP>)(.*?)(?=</AMP>)','match'));
+    Source(sc).SetVolt  = str2double(regexp(Source(sc).Info,'(?<=<DesiredVoltage>)(.*?)(?=</DesiredVoltage>)','match'));
+    
+    if isempty(Source(sc).R2)
+        Source(sc).R2 = Source(sc).R1; Source(sc).X2 = Source(sc).X1;
+        warning('Missing Negative Sequence Source Impedance. Default Z2 = Z1')
+    end
+    if isnan(Source(sc).PeakAmps)
+        defaultPeak = [400,400,400];
+        Source(sc).PeakAmps = defaultPeak;
+        warning('Missing Peak Source Current. Default A: %dA, B: %dA, C: %dA',defaultPeak)
+    end
+    if isnan(Source(sc).SetVolt)
+        defaultPU = 1.03;
+        Source(sc).SetVolt = defaultPU*Source(sc).BaseKVLL;
+        warning('Missing Source Voltage Set Point. Default %.2fpu',defaultPU)
+    end
+    
+    % Print Master File
+    Source(sc).DSSCircuit = sprintf(['New Circuit.%s Bus1=%s BasekV=%.2f  pu=%.4f ',...
+        'angle=%.2f Z1=[ %.4f %.4f ] Z2=[ %.4f %.4f ] Z0=[ %.4f %.4f ]'],...
+        Source(sc).ID,Source(sc).ID,Source(sc).BaseKVLL,Source(sc).SetVolt/Source(sc).BaseKVLL,...
+        Source(sc).SetAngle,Source(sc).R1,Source(sc).X1,Source(sc).R2,Source(sc).X2,Source(sc).R0,Source(sc).X0);
+    Source(sc).DSSVoltbase = sprintf('Set voltagebases = [ %.2f %.2f ] CalcVoltageBases',...
+        Source(sc).BaseKVLL,Source(sc).BaseKVLL/sqrt(3));
+    Source(sc).EnergyMeter = sprintf(['New EnergyMeter.CircuitMeter Line.%s ',...
+        'terminal=1 option=R PhaseVoltageReport=yes peakcurrent=[ %.2f   %.2f   %.2f ]'],...
+        Source(sc).MeterLine,Source(sc).PeakAmps);
+end
 
-%[~,~,ic] = unique([{Lines.Bus1},{Lines.Bus2},{[Source.ID,'.1.2.3']}],'stable');
-Source.MeterLine = Lines(mod(ic(end)-1,l)+1).ID;
-index = mod(find(ismember([{Lines.Bus1},{Lines.Bus2}],[Source.ID,'.1.2.3'])),l);
-Source.MeterLine = Lines(index).ID;
-
-Source.PeakAmps = str2double(regexp(Source.Info,'(?<=<AMP>)(.*?)(?=</AMP>)','match'));
-Source.SetVolt = str2double(regexp(Source.Info,'(?<=<DesiredVoltage>)(.*?)(?=</DesiredVoltage>)','match'));
-
-if isempty(Source.R2)
-    Source.R2 = Source.R1; Source.X2 = Source.X1;
+if isempty(Source(source).R2)
+    Source(source).R2 = Source(source).R1; Source(source).X2 = Source(source).X1;
     warning('Missing Negative Sequence Source Impedance. Default Z2 = Z1')
 end
-if isnan(Source.PeakAmps)
-    Source.PeakAmps = [400,400,400];
+if isnan(Source(source).PeakAmps)
+    Source(source).PeakAmps = [400,400,400];
     warning('Missing Peak Source Current. Default 400A/phase')
 end
-if isnan(Source.SetVolt)
-    Source.SetVolt = 1.03*Source.BaseKVLL;
+if isnan(Source(source).SetVolt)
+    Source(source).SetVolt = 1.03*Source(source).BaseKVLL;
     warning('Missing Source Voltage Set Point. Default 1.03pu')
 end
 
 % Print Master File
 fid(7) = fopen([savelocation,'Master.dss'],'wt');
 fprintf(fid(7),['Clear\n\n! Define the Circuit\n',...
-    sprintf('New Circuit.%s Bus1=%s',Source.ID,Source.ID),'\n',...
-    sprintf('~ BasekV=%.2f  pu=%.4f  angle=%.2f',Source.BaseKVLL,...
-        Source.SetVolt/Source.BaseKVLL,Source.SetAngle),'\n',...
-    sprintf('~ Z1=[ %.4f %.4f ]',Source.R1,Source.X1),'\n',...
-    sprintf('~ Z2=[ %.4f %.4f ]',Source.R2,Source.X2),'\n',...
-    sprintf('~ Z0=[ %.4f %.4f ]',Source.R0,Source.X0),'\n\n',...
+    sprintf('New Circuit.%s Bus1=%s',Source(source).ID,Source(source).ID),'\n',...
+    sprintf('~ BasekV=%.2f  pu=%.4f  angle=%.2f',Source(source).BaseKVLL,...
+        Source(source).SetVolt/Source(source).BaseKVLL,Source(source).SetAngle),'\n',...
+    sprintf('~ Z1=[ %.4f %.4f ]',Source(source).R1,Source(source).X1),'\n',...
+    sprintf('~ Z2=[ %.4f %.4f ]',Source(source).R2,Source(source).X2),'\n',...
+    sprintf('~ Z0=[ %.4f %.4f ]',Source(source).R0,Source(source).X0),'\n\n',...
     '! Library Data\n',...
     'Redirect Libraries\\WireData.dss\n',...
     'Redirect Libraries\\LineSpacing.dss\n',...
@@ -587,15 +596,15 @@ fprintf(fid(7),['Clear\n\n! Define the Circuit\n',...
     '!Redirect Controls\\SwitContrl.dss\n',...
     '!Redirect Controls\\ReclContrl.dss\n\n',...
     '! Set the voltage bases\n',...
-    sprintf('Set voltagebases = [ %.2f %.2f]\n',...
-        Source.BaseKVLL,Source.BaseKVLL/sqrt(3)),...
+    sprintf('Set voltagebases = [ %.2f %.2f 0.480 0.208 0.240 0.120 ]\n',...
+        Source(source).BaseKVLL,Source(source).BaseKVLL/sqrt(3)),...
     'CalcVoltageBases\n\n',...
     '! Define the bus coordinates\n',...
     'Buscoords BusCoords.dss\n\n',...
     '! Define an energy meter\n',...
-    'New EnergyMeter.CircuitMeter ',sprintf('LINE.%s',Source.MeterLine),...
+    'New EnergyMeter.CircuitMeter ',sprintf('LINE.%s',Source(source).MeterLine),...
     ' terminal=1 option=R PhaseVoltageReport=yes\n',...
-    sprintf('~ peakcurrent=[ %.2f   %.2f   %.2f ]',Source.PeakAmps)]);
+    sprintf('~ peakcurrent=[ %.2f   %.2f   %.2f ]',Source(source).PeakAmps)]);
 fclose(fid(7));
 
 
